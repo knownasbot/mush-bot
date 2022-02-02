@@ -24,7 +24,7 @@ module.exports = (client) => {
                 options: command.options
             });
         } catch(e) {
-            console.error(`Falha ao carregar o comando ${file}:`, e);
+            console.error("[Comandos]", `Falha ao carregar o comando ${file}:`, e);
         }
     });
 
@@ -33,8 +33,10 @@ module.exports = (client) => {
     .then(guilds => {
         guilds.forEach(guild => {
             client.application.commands.set(commandsOptions, guild.id)
-            .catch(e => console.error(`Falha ao registrar commandos na guilda ${guild.id}:`, e));
+            .catch(e => console.error("[Comandos]", `Falha ao registrar commandos na guilda ${guild.id}:`, e));
         });
+
+        console.log("[Comandos]", "Comandos carregados.");
     })
-    .catch(e => console.error(`Falha ao obter as guildas:`, e));
+    .catch(e => console.error("[Comandos]", `Falha ao obter as guildas:`, e));
 }
