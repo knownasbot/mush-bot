@@ -4,10 +4,10 @@ const cheerio = require("cheerio");
 /**
  * Coleta e retorna dados de minigame do jogador.
  * @param {string} user Usuário a ser checado.
- * @returns {Promise}
+ * @returns {Promise<object>}
  */
-module.exports = async(user) => {
-    let data = {}
+module.exports = async (user) => {
+    let data = {};
 
     let res = await axios.get(`https://mush.com.br/player/${user}`);
     let $ = cheerio.load(res.data);
