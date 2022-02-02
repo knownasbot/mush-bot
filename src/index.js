@@ -8,6 +8,14 @@ const client = new Client({
 });
 
 client.commands = new Collection();
+client.mush = {
+    cache: {
+        profile: new Collection(),
+        leaderboard: new Collection()
+    },
+
+    leaderboardModes: []
+}
 
 eventHandler(client);
 
