@@ -1,5 +1,5 @@
 const { Client, CommandInteraction, MessageEmbed } = require("discord.js");
-const userStats = require("../modules/scraping/userStats");
+const userStats = require("../modules/api/userStats");
 
 module.exports = {
     name: "perfil",
@@ -28,19 +28,24 @@ module.exports = {
                 stats.lastActivity = Date.now();
                 client.mush.cache.profile.set(usernameParam, stats);
             } catch(e) {
-                return interaction.reply("Jogador desconhecido.");
+                return await interaction.reply("Jogador desconhecido.");
             }
         }
 
-        let description = `Rank: \`${stats.profileInfo.rank}\`\n`;
-        description    += `Visto por último: \`${stats.profileInfo.lastSeen}\`\n`;
-        description    += `Primeiro login:: \`${stats.profileInfo.firstLogin}\`\n`;
+        let firstLogin = new Date(stats.first_login).toLocaleString();
+        let lastLogin = new Date(stats.last_login).toLocaleString();
+
+        let description = `Rank: **\` ${stats.rank.title ?? "Desconhecido"} \`**\n`;
+        description    += `Visto por último: \`${stats.first_login ? lastLogin : "Desconhecido"}\`\n`;
+        description    += `Primeiro login: \`${stats.last_login ? firstLogin : "Desconhecido"}\`\n`;
+
+        if (stats.banned) description = "**⚠️ BANIDO ⚠️**\n" + description;
 
         const embed = new MessageEmbed()
         .setAuthor({
-            name: stats.profileInfo.username,
+            name: stats.account.username,
             url: `https://mush.com.br/player/${usernameParam}`,
-            iconURL: stats.profileInfo.avatar
+            iconURL: `https://minotar.net/avatar/${usernameParam}`
         })
         .setColor(0xe83e8c)
         .setDescription(description)
@@ -50,30 +55,53 @@ module.exports = {
         })
         .setTimestamp();
 
-        for (let minigame of stats.minigamesInfo) {
-            let text = "";
-            let icon;
-            let icons = [
-                ["🍄", /hg/i],
-                ["⚔️", /pvp|duels/i],
-                ["🏹", /sky/i],
-                ["🥳", /party/i],
-                ["🛏️", /bed/i]
-            ];
+        stats = stats.stats;
 
-            for (let stat of minigame.stats) {
-                text += `${stat.title}: \`${stat.value}\`\n`;
+        let minigames = [
+            {
+                title: "🍄 HG",
+                text: `Kills: \`${stats.hungergames?.kills ?? 0}\`\n` +
+                      `Vitórias: \`${stats.hungergames?.wins ?? 0}\`\n` +
+                      `Mortes: \`${stats.hungergames?.deaths ?? 0}\`\n` +
+                      `K/D: \`${((stats.hungergames?.kills ?? 0) / (stats.hungergames?.deaths ?? 1)).toFixed(2)}\``
+            },
+            {
+                title: "⚔️ PvP",
+                text: `Arena: Kills: \`${stats.pvp?.arena_kills ?? 0}\`\n` +
+                      `Arena: Mortes: \`${stats.pvp?.arena_deaths ?? 0}\``
+            },
+            {
+                title: "⚔️ Duels: 1v1",
+                text: `Vitórias: \`${stats.duels?.soup_wins ?? 0}\`\n` +
+                      `Derrotas: \`${stats.duels?.soup_deaths ?? 0}\`\n` +
+                      `Winstreak: \`${stats.duels?.soup_winstreak ?? 0}\``
+            },
+            {
+                title: "🏹 Sky Wars",
+                text: `Kills: \`${stats.skywars_r1?.kills ?? 0}\`\n` +
+                      `Vitórias: \`${stats.skywars_r1?.wins ?? 0}\`\n` +
+                      `Derrotas: \`${stats.skywars_r1?.losses ?? 0}\`\n`
+            },
+            {
+                title: "🥳 Party",
+                text: `1º Lugar: \`${stats.party?.first_place ?? 0}\`\n` +
+                      `2º Lugar: \`${stats.party?.second_place ?? 0}\`\n` +
+                      `3º Lugar: \`${stats.party?.third_place ?? 0}\`\n` +
+                      `Pontos: \`${stats.party?.points ?? 0}\``
+            },
+            {
+                title: "🛏️ Bed Wars",
+                text: `Vitórias: \`${stats.bedwars?.wins ?? 0}\`\n` +
+                      `Kills: \`${stats.bedwars?.kills ?? 0}\`\n` +
+                      `Kills Finais: \`${stats.bedwars?.final_kills ?? 0}\`\n`
             }
+        ];
 
-            for (let test of icons) {
-                if (test[1].test(minigame.title)) {
-                    icon = test[0] + " ";
-                    break;
-                }
-            }
-
-            embed.addField(icon + minigame.title, text, true);
+        for (let minigame of minigames) {
+            embed.addField(minigame.title, minigame.text, true);
         }
+
+        // TODO: selecionar minigame para ver informações detalhadas
 
         return interaction.reply({ embeds: [ embed ] });
     }
