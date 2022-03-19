@@ -3,7 +3,7 @@
 
 *Nota: este bot desenvolvido não é oficial, foi apenas desenvolvido por um jogador (eu) a fim de facilitar a consulta através do Discord.*
 
-![Bot em funcionamento](https://i.ibb.co/j3g2zXx/image.png "Bot em funcionamento")
+![Bot em funcionamento](https://i.ibb.co/wyQ8BFS/image.png "Bot em funcionamento")
 
 ## Instalação
 1. Instale a versão mais recente do [Node.js](https://nodejs.org/en/).
